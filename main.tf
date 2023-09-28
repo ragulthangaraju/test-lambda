@@ -1,39 +1,11 @@
-# Define your AWS provider configuration
 provider "aws" {
-  region = "ap-south-1" # Change to your desired AWS region
+  region = "us-east-1"
 }
 
-# Create an IAM role for Lambda
-resource "aws_iam_role" "lambda_role" {
-  name = "CICD"
-
-  # Attach policies with necessary permissions here
-  # Example:
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = "sts:AssumeRole",
-        Effect = "Allow",
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        }
-      }
-    ]
-  })
+resource "aws_instance" "foo" {
+  ami           = "ami-05fa00d4c63e32376" # us-west-2
+  instance_type = "t2.micro"
+  tags = {
+    Name = "TF-Instance"
+  }
 }
-
-# Create the Lambda function
-resource "aws_lambda_function" "my_lambda" {
-  function_name = "my-lambda-function"
-  handler = "index.handler" # Change this to your actual handler
-  runtime = "nodejs16.x" # Change this to your desired Node.js runtime
-
-  # Attach the IAM role created above
-  role = aws_iam_role.lambda_role.arn
-
-  # Specify your deployment package (e.g., a .zip file)
-  filename = "demo.zip"
-}
-
-# Define any other AWS resources as needed (e.g., API Gateway, S3, etc.)
