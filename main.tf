@@ -1,14 +1,10 @@
-# Define your AWS provider configuration
 provider "aws" {
-  region = "ap-south-1" # Change to your desired AWS region
+  region = "us-east-1" # Replace with your desired AWS region
 }
 
-# Create an IAM role for Lambda
-resource "aws_iam_role" "lambda_role" {
-  name = "CICD"
+resource "aws_iam_role" "lambda_execution_role" {
+  name = "lambda-execution-role"
 
-  # Attach policies with necessary permissions here
-  # Example:
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -23,17 +19,24 @@ resource "aws_iam_role" "lambda_role" {
   })
 }
 
-# Create the Lambda function
-resource "aws_lambda_function" "my_lambda" {
-  function_name = "my-lambda-function"
-  handler = "index.handler" # Change this to your actual handler
-  runtime = "nodejs16.x" # Change this to your desired Node.js runtime
+resource "aws_lambda_function" "example_lambda" {
+  function_name = "example-lambda-function"
+  handler = "index.handler" # Update with your actual handler
+  runtime = "nodejs16.x"    # Update with your desired runtime
 
-  # Attach the IAM role created above
-  role = aws_iam_role.lambda_role.arn
+  role = aws_iam_role.lambda_execution_role.arn
 
-  # Specify your deployment package (e.g., a .zip file)
+  # Specify the path to your Lambda deployment package (ZIP file)
   filename = "demo.zip"
-}
 
-# Define any other AWS resources as needed (e.g., API Gateway, S3, etc.)
+  # Optionally, you can configure environment variables, memory size, and timeout.
+  environment {
+    variables = {
+      ENV_VAR1 = "value1",
+      ENV_VAR2 = "value2"
+    }
+  }
+
+  memory_size = 128
+  timeout = 10
+}
