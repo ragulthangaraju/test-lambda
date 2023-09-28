@@ -1,9 +1,9 @@
 provider "aws" {
-  region = "us-east-1" # Replace with your desired AWS region
+  region = "ap-south-1" # Replace with your desired AWS region
 }
 
-resource "aws_iam_role" "lambda_execution_role" {
-  name = "lambda-execution-role"
+resource "aws_iam_role" "CICD" {
+  name = "CICD"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -24,7 +24,7 @@ resource "aws_lambda_function" "example_lambda" {
   handler = "index.handler" # Update with your actual handler
   runtime = "nodejs16.x"    # Update with your desired runtime
 
-  role = aws_iam_role.lambda_execution_role.arn
+  role = aws_iam_role.CICD.arn
 
   # Specify the path to your Lambda deployment package (ZIP file)
   filename = "demo.zip"
