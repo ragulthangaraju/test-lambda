@@ -13,10 +13,7 @@ pipeline {
         stage('checkout') {
             steps {
                  script{
-                        dir("terraform")
-                        {
-                            git "https://github.com/ragulthangaraju/test-lambda.git"
-                        }
+                    git "https://github.com/ragulthangaraju/test-lambda.git"
                     }
                 }
             }
