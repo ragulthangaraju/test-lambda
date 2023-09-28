@@ -1,35 +1,54 @@
 pipeline {
-    agent any
 
+    parameters {
+        booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
+    }
+    environment {
+        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+    }
+
+   agent  any
     stages {
-        stage('Checkout') {
+        stage('checkout') {
             steps {
-                // Check out your GitHub repository
-                checkout scm
-            }
-        }
-
-        stage('Terraform Deployment') {
-            steps {
-                script {
-                    // Install Terraform (if not already installed)
-                    sh 'terraform init'
-                    sh 'terraform apply -auto-approve'
+                 script{
+                        dir("terraform")
+                        {
+                            git "https://github.com/ragulthangaraju/test-lambda.git"
+                        }
+                    }
                 }
             }
-        }
 
-        // Add more stages for testing, notifications, etc., as needed
+        stage('Plan') {
+            steps {
+                sh 'pwd;cd terraform/ ; terraform init'
+                sh "pwd;cd terraform/ ; terraform plan -out tfplan"
+                sh 'pwd;cd terraform/ ; terraform show -no-color tfplan > tfplan.txt'
+            }
+        }
+        stage('Approval') {
+           when {
+               not {
+                   equals expected: true, actual: params.autoApprove
+               }
+           }
+
+           steps {
+               script {
+                    def plan = readFile 'terraform/tfplan.txt'
+                    input message: "Do you want to apply the plan?",
+                    parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
+               }
+           }
+       }
+
+        stage('Apply') {
+            steps {
+                sh "pwd;cd terraform/ ; terraform apply -input=false tfplan"
+            }
+        }
     }
 
-    post {
-        success {
-            // Notify on successful deployment
-            slackSend channel: '#your-slack-channel', color: 'good', message: 'Deployment Successful!'
-        }
-        failure {
-            // Notify on deployment failure
-            slackSend channel: '#your-slack-channel', color: 'danger', message: 'Deployment Failed!'
-        }
-    }
-}
+  }
