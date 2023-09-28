@@ -5,7 +5,7 @@ provider "aws" {
 
 # Create an IAM role for Lambda
 resource "aws_iam_role" "lambda_role" {
-  name = "lambda_execution_role"
+  name = "CICD"
 
   # Attach policies with necessary permissions here
   # Example:
